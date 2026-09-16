@@ -22,3 +22,6 @@ DerivedData/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Downloaded third-party binaries (see spikes/sync/README.md)
+/vendor/
