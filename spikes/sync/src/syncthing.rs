@@ -9,12 +9,23 @@ use tokio::process::{Child, Command};
 
 use crate::identity::DeviceIdentity;
 
+/// How an instance reaches other devices.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum Network {
+    /// Fixed loopback addresses; discovery, relays and NAT traversal off.
+    Loopback,
+    /// Public global discovery and the community relay pool only: no direct
+    /// listeners, no local discovery, no router port mapping.
+    RelayOnly,
+}
+
 pub struct Instance {
     pub name: String,
     pub home: PathBuf,
     pub folder_path: PathBuf,
     pub gui_port: u16,
     pub listen_port: u16,
+    pub network: Network,
     api_key: String,
     binary: PathBuf,
     child: Option<Child>,
@@ -22,13 +33,21 @@ pub struct Instance {
 }
 
 impl Instance {
-    pub fn new(name: &str, run_dir: &Path, binary: &Path, gui_port: u16, listen_port: u16) -> Self {
+    pub fn new(
+        name: &str,
+        run_dir: &Path,
+        binary: &Path,
+        gui_port: u16,
+        listen_port: u16,
+        network: Network,
+    ) -> Self {
         Self {
             name: name.to_string(),
             home: run_dir.join(name).join("syncthing-home"),
             folder_path: run_dir.join(name).join("Grandpa Saul Letters"),
             gui_port,
             listen_port,
+            network,
             api_key: format!("spike-{name}-{}", crate::to_hex(rand::random::<[u8; 8]>())),
             binary: binary.to_path_buf(),
             child: None,
@@ -37,7 +56,10 @@ impl Instance {
     }
 
     pub fn listen_address(&self) -> String {
-        format!("tcp://127.0.0.1:{}", self.listen_port)
+        match self.network {
+            Network::Loopback => format!("tcp://127.0.0.1:{}", self.listen_port),
+            Network::RelayOnly => "dynamic+https://relays.syncthing.net/endpoint".to_string(),
+        }
     }
 
     /// Create config and keys. With `identity`, Syncthing keeps that certificate.
@@ -59,14 +81,16 @@ impl Instance {
             );
         }
 
-        // Keep the spike off the public network: no global discovery, relays,
-        // NAT traversal, usage reporting, crash reports, or upgrades.
+        // Loopback runs stay off the public network entirely. Relay runs use only
+        // public discovery and relays. Neither sends usage or crash reports,
+        // maps router ports, or upgrades itself.
+        let public = self.network == Network::RelayOnly;
         let config_path = self.home.join("config.xml");
         let mut config = std::fs::read_to_string(&config_path)?;
         for (from, to) in [
             (
                 "<globalAnnounceEnabled>true</globalAnnounceEnabled>",
-                "<globalAnnounceEnabled>false</globalAnnounceEnabled>".to_string(),
+                format!("<globalAnnounceEnabled>{public}</globalAnnounceEnabled>"),
             ),
             (
                 "<localAnnounceEnabled>true</localAnnounceEnabled>",
@@ -74,7 +98,7 @@ impl Instance {
             ),
             (
                 "<relaysEnabled>true</relaysEnabled>",
-                "<relaysEnabled>false</relaysEnabled>".to_string(),
+                format!("<relaysEnabled>{public}</relaysEnabled>"),
             ),
             (
                 "<natEnabled>true</natEnabled>",
@@ -210,10 +234,20 @@ impl Instance {
     }
 
     pub async fn ensure_device(&self, device_id: &str, name: &str, address: &str) -> Result<()> {
+        self.ensure_device_addresses(device_id, name, &[address.to_string()])
+            .await
+    }
+
+    pub async fn ensure_device_addresses(
+        &self,
+        device_id: &str,
+        name: &str,
+        addresses: &[String],
+    ) -> Result<()> {
         let mut device = self.get("/rest/config/defaults/device").await?;
         device["deviceID"] = json!(device_id);
         device["name"] = json!(name);
-        device["addresses"] = json!([address]);
+        device["addresses"] = json!(addresses);
         self.put(&format!("/rest/config/devices/{device_id}"), device)
             .await
     }
@@ -255,6 +289,13 @@ impl Instance {
     pub async fn folder_status(&self, folder_id: &str) -> Result<Value> {
         self.get(&format!("/rest/db/status?folder={folder_id}"))
             .await
+    }
+
+    /// Connection details for one device, if currently connected.
+    pub async fn connection(&self, device_id: &str) -> Result<Option<Value>> {
+        let conns = self.get("/rest/system/connections").await?;
+        let c = &conns["connections"][device_id];
+        Ok((c["connected"] == json!(true)).then(|| c.clone()))
     }
 
     pub async fn connected_devices(&self) -> Result<Vec<String>> {

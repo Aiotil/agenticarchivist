@@ -44,11 +44,24 @@ cargo run --release -p sync-spike
 
 Options: `SPIKE_FILES` (default 30), `SPIKE_FILE_MB` (default 4), `SYNCTHING_BIN` (path to another Syncthing binary). Each run writes to `target/sync-spike/run-<time>/` and leaves a `report.md` there. Delete the run folder afterwards; it holds three copies of the test data.
 
-The instances use fixed loopback ports (GUI 18401–18403, sync 22101–22103) and have global discovery, local discovery, relays, NAT traversal, usage reporting, crash reporting, and upgrades turned off, so nothing leaves the machine.
+The default (loopback) run uses fixed ports (GUI 18401–18403, sync 22101–22103) and has global discovery, local discovery, relays, NAT traversal, usage reporting, crash reporting, and upgrades turned off, so nothing leaves the machine.
+
+### Relay-only run
+
+```sh
+SPIKE_FILES=10 SPIKE_FILE_MB=5 cargo run --release -p sync-spike -- relay
+```
+
+Two instances (A and B) with no direct listeners, no local discovery, and no router port mapping. They can only find each other through Syncthing's public discovery servers and only connect through the community relay pool, as two homes behind strict routers would. The invite carries device IDs only. This run uses public Syncthing infrastructure, so keep the test data small.
 
 ## Results
 
-First run, 16 September 2026, macOS, Syncthing v2.1.5: **all 17 checks passed.** Full report: [results/2026-09-16-mac-loopback.md](results/2026-09-16-mac-loopback.md).
+16 September 2026, macOS, Syncthing v2.1.5:
+
+| Run | Result | Report |
+| --- | --- | --- |
+| Loopback, three instances | 17 of 17 checks passed | [results/2026-09-16-mac-loopback.md](results/2026-09-16-mac-loopback.md) |
+| Relay only, two instances | 6 of 6 checks passed (after the discovery fix below; first two attempts failed) | [results/2026-09-16-mac-relay.md](results/2026-09-16-mac-relay.md) |
 
 ### Findings
 
@@ -56,13 +69,16 @@ First run, 16 September 2026, macOS, Syncthing v2.1.5: **all 17 checks passed.**
 - **The device log can be signed with the Syncthing device key itself.** Each log starts with the device's certificate, so a log entry is tied to exactly the device that membership entries grant roles to.
 - **One writer per file works.** Concurrent edits on two devices produced no Syncthing conflict copies, and both merged to the same state. Sidecars excluded by `.stignore` stayed different on each device, as intended.
 - **Inviter offline works.** Because the `add-member` entry travels in the log, any member that has seen it accepts the newcomer.
-- **Invite link length:** 544 characters, including spike-only local addresses. Without them it will be shorter.
+- **Invite link length:** 397 characters with device IDs only (544 with the loopback run's spike-only addresses).
+- **A new device can stall for about 30 minutes on discovery.** When the public discovery server doesn't know a device yet, it answers "not found" with `Retry-After` of roughly 30 minutes, and Syncthing honours it. In the first relay attempts both devices started together, looked each other up before either had announced, and never connected within 10 minutes. The server also briefly returned "not found" for a device it had listed a minute earlier. **Fix, now in the prototype:** the joining app looks members up itself (retrying every 10 s) and writes the returned relay address into Syncthing's device config alongside `dynamic`. With that, B resolved A in 21 s and connected 2 s later. The product should do the same whenever a member hasn't connected yet.
+- **Relays work, and are slow.** Both devices joined public relays within about 16 s, announced themselves, and connected through a community relay (TLS 1.3, end to end). 55 MB took 108 s: **4.1 Mbit/s**, so about 33 minutes per GB and roughly 23 days per TB. Both ends were on this Mac, so the data went out to the relay and back over one home connection; the relay's rate limit and the home upload speed both cap this. It confirms that first copies of large collections need a direct connection or seeding from a drive.
+- **IPv6 discovery announcements failed** (no IPv6 route on the test network); IPv4 worked, and nothing depended on IPv6.
 - **Viewer protection has two layers.** A receive-only Syncthing folder never sends the viewer's changes, and merge-time role checks reject them even if they arrive.
 - **Watch disk space.** The test Mac had 4.6 GB free (99% full). Syncthing's default minimum free space (1%) made it pause and retry, which is why B took 28 s. The product must show a clear "not enough space" state rather than a silent retry.
 
 ### Not covered yet
 
-- Real networks: discovery, NAT traversal and relays were off; devices used fixed loopback addresses.
+- Direct connections across two real home networks (NAT traversal); only loopback and relay-only paths were tested.
 - Two physical Macs, large collections (100 GB+), and interrupted transfers.
 - Person identity keys above device keys; roles are currently granted per device.
 - Replacing the seat identity with a fresh one after joining (single-use links).
