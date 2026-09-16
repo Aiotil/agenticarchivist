@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vra xmlns="http://www.vraweb.org/vracore4.htm"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.vraweb.org/vracore4.htm http://www.loc.gov/standards/vracore/vra.xsd">
+  <work id="w-0001" refid="ABR-0001" source="Abrams family collection">
+    <agentSet>
+      <display>Saul Abrams (writer)</display>
+      <agent>
+        <name type="personal">Saul Abrams</name>
+        <role>writer</role>
+      </agent>
+    </agentSet>
+    <dateSet>
+      <display>1943</display>
+      <date type="creation">
+        <earliestDate circa="false">1943</earliestDate>
+        <latestDate circa="false">1943</latestDate>
+      </date>
+    </dateSet>
+    <descriptionSet>
+      <display>Handwritten letter in German from Saul to his sister Rose, sent from Lisbon.</display>
+      <description>Handwritten letter in German from Saul to his sister Rose, sent from Lisbon.</description>
+    </descriptionSet>
+    <inscriptionSet>
+      <display>Liebe Rosa, wir sind gesund und warten auf das Schiff. Grüße an alle — Dein Saul</display>
+      <inscription>
+        <position>recto</position>
+        <text type="text">Liebe Rosa, wir sind gesund und warten auf das Schiff. Grüße an alle — Dein Saul</text>
+      </inscription>
+    </inscriptionSet>
+    <locationSet>
+      <display>Lisbon, Portugal</display>
+      <location type="creation">
+        <name type="geographic">Lisbon, Portugal</name>
+      </location>
+    </locationSet>
+    <materialSet>
+      <display>ink; paper</display>
+      <material type="medium" vocab="AAT" refid="300015012">ink</material>
+      <material type="medium" vocab="AAT" refid="300014109">paper</material>
+    </materialSet>
+    <measurementsSet>
+      <display>27 × 21 cm</display>
+    </measurementsSet>
+    <relationSet>
+      <display>IMG_0412.tif; IMG_0413.tif</display>
+      <relation type="imageIs" relids="i-0001-1" pref="true">1943 Letter to Rose/IMG_0412.tif</relation>
+      <relation type="imageIs" relids="i-0001-2">1943 Letter to Rose/IMG_0413.tif</relation>
+    </relationSet>
+    <rightsSet>
+      <display>Private family archive. Not for publication.</display>
+      <rights type="undetermined">
+        <text>Private family archive. Not for publication.</text>
+      </rights>
+    </rightsSet>
+    <subjectSet>
+      <display>emigration</display>
+      <subject>
+        <term type="descriptiveTopic">emigration</term>
+      </subject>
+    </subjectSet>
+    <titleSet>
+      <display>1943 Letter to Rose</display>
+      <title type="descriptive" pref="true">1943 Letter to Rose</title>
+    </titleSet>
+    <worktypeSet>
+      <display>letters (correspondence)</display>
+      <worktype vocab="AAT" refid="300026879">letters (correspondence)</worktype>
+    </worktypeSet>
+  </work>
+  <image id="i-0001-1" source="AgenticArchivist">
+    <relationSet>
+      <display>1943 Letter to Rose</display>
+      <relation type="imageOf" relids="w-0001" pref="true">1943 Letter to Rose</relation>
+    </relationSet>
+    <titleSet>
+      <display>1943 Letter to Rose/IMG_0412.tif (recto)</display>
+      <title type="descriptive">1943 Letter to Rose/IMG_0412.tif (recto)</title>
+    </titleSet>
+  </image>
+  <image id="i-0001-2" source="AgenticArchivist">
+    <relationSet>
+      <display>1943 Letter to Rose</display>
+      <relation type="imageOf" relids="w-0001" pref="true">1943 Letter to Rose</relation>
+    </relationSet>
+    <titleSet>
+      <display>1943 Letter to Rose/IMG_0413.tif (verso)</display>
+      <title type="descriptive">1943 Letter to Rose/IMG_0413.tif (verso)</title>
+    </titleSet>
+  </image>
+  <work id="w-0002" refid="ABR-0002" source="Abrams family collection">
+    <agentSet>
+      <display>Unknown studio (photographer)</display>
+      <agent>
+        <name type="personal">Unknown studio</name>
+        <role>photographer</role>
+      </agent>
+    </agentSet>
+    <dateSet>
+      <display>c. 1950</display>
+      <date type="creation">
+        <earliestDate circa="true">1948</earliestDate>
+        <latestDate circa="true">1952</latestDate>
+      </date>
+    </dateSet>
+    <descriptionSet>
+      <display>Studio portrait of Saul and Miriam on their wedding day.</display>
+      <description>Studio portrait of Saul and Miriam on their wedding day.</description>
+    </descriptionSet>
+    <inscriptionSet>
+      <display>Studio Kowalski, Brooklyn</display>
+      <inscription>
+        <position>verso</position>
+        <text type="text">Studio Kowalski, Brooklyn</text>
+      </inscription>
+    </inscriptionSet>
+    <locationSet>
+      <display>Brooklyn, United States</display>
+      <location type="creation">
+        <name type="geographic">Brooklyn, United States</name>
+      </location>
+    </locationSet>
+    <measurementsSet>
+      <display>18 × 13 cm</display>
+    </measurementsSet>
+    <relationSet>
+      <display>IMG_0600.tif; IMG_0600.jpg</display>
+      <relation type="imageIs" relids="i-0002-1" pref="true">scans-2026-09-12/IMG_0600.tif</relation>
+      <relation type="imageIs" relids="i-0002-2">scans-2026-09-12/IMG_0600.jpg</relation>
+    </relationSet>
+    <rightsSet>
+      <display>Private family archive. Not for publication.</display>
+      <rights type="undetermined">
+        <text>Private family archive. Not for publication.</text>
+      </rights>
+    </rightsSet>
+    <subjectSet>
+      <display>weddings</display>
+      <subject>
+        <term type="descriptiveTopic">weddings</term>
+      </subject>
+    </subjectSet>
+    <techniqueSet>
+      <display>gelatin silver prints</display>
+      <technique vocab="AAT" refid="300128695">gelatin silver prints</technique>
+    </techniqueSet>
+    <titleSet>
+      <display>Wedding portrait, c. 1950</display>
+      <title type="descriptive" pref="true">Wedding portrait, c. 1950</title>
+    </titleSet>
+    <worktypeSet>
+      <display>portraits</display>
+      <worktype vocab="AAT" refid="300015637">portraits</worktype>
+    </worktypeSet>
+  </work>
+  <image id="i-0002-1" source="AgenticArchivist">
+    <relationSet>
+      <display>Wedding portrait, c. 1950</display>
+      <relation type="imageOf" relids="w-0002" pref="true">Wedding portrait, c. 1950</relation>
+    </relationSet>
+    <titleSet>
+      <display>scans-2026-09-12/IMG_0600.tif (recto)</display>
+      <title type="descriptive">scans-2026-09-12/IMG_0600.tif (recto)</title>
+    </titleSet>
+  </image>
+  <image id="i-0002-2" source="AgenticArchivist">
+    <relationSet>
+      <display>Wedding portrait, c. 1950</display>
+      <relation type="imageOf" relids="w-0002" pref="true">Wedding portrait, c. 1950</relation>
+    </relationSet>
+    <titleSet>
+      <display>scans-2026-09-12/IMG_0600.jpg (detail)</display>
+      <title type="descriptive">scans-2026-09-12/IMG_0600.jpg (detail)</title>
+    </titleSet>
+  </image>
+</vra>
