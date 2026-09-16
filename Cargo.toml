@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["core", "daemon", "spikes/sidecars"]
+members = ["core", "daemon", "spikes/sync", "spikes/sidecars"]
 
 [workspace.package]
 version = "0.0.1"
