@@ -85,7 +85,9 @@ For 10,000 images, a previews device needs about 4–6 GB; a keeper with 150 MB 
 
 ## Invites
 
-An invite is a link sent by Messages or email, for example `https://join.agenticarchivist.com/#v1.…`.
+An invite is a link sent by Messages or email, for example `https://aiotil.github.io/agenticarchivist/#v1.…`.
+
+The join page is served by GitHub Pages from `site/`. It will move to a custom domain (such as `join.agenticarchivist.com`) once the current web app is retired. Links expire after 7 days, so the move doesn't break anything. Opening the app directly from a link needs Apple's `apple-app-site-association` file at the root of the link's domain, so that waits for the custom domain.
 
 1. The sender creates a one-time seat secret, derives a device identity from it, and writes a signed `add-member` entry that pre-approves that identity.
 2. The recipient opens the link, downloads the app, and joins. The app replaces the seat identity with a fresh one, so the link works once.
