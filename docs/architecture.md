@@ -17,7 +17,7 @@ This is a summary of the current design. It will change as the prototypes answer
 | Core (`core/`) | Rust | All | Op-log, SQLite library, sidecars and catalog files, Gemini client, job claims, Syncthing control |
 | Background process (`daemon/`) | Rust | Mac, Windows | Folder watching, ingest, AI jobs, local HTTP API, supervises bundled Syncthing |
 | Syncthing | Upstream binary, pinned | Mac, Windows (iPhone via gomobile) | File transfer, discovery, relays |
-| Desktop window (`desktop/`) | Tauri 2 + Svelte 5 | Mac, then Windows | Library grid, work editor, grouping review, devices and sharing |
+| Desktop window (`desktop/`) | Tauri 2 + Svelte 5 | Mac, then Windows | Library grid, work editor, bulk editor, grouping review, devices and sharing |
 | iPhone app (`ios/`) | Swift + core via UniFFI | iOS | RAW bracket capture, browsing, partial copy |
 
 ## Sync
@@ -56,8 +56,32 @@ Sidecars use XMP with Dublin Core, IPTC Core and Extension, VRA Core, and Getty 
 
 - A **person** has an Ed25519 identity key in the system keychain.
 - A **device** has a Syncthing device ID certified by the person key.
-- **Roles:** viewer (receive-only), editor (catalogue, add images, run AI jobs), admin (invite, change roles, remove).
+- **Roles** (set by an admin, per person): viewer (read-only), editor (catalogue, add images, run AI jobs), admin (invite, change roles, remove).
 - Each log entry names the latest membership entry its author had seen; entries from authors without the required role are ignored everywhere.
+
+## Keepers and previews
+
+**Keeper** is a per-device setting chosen by the person.
+
+| | Keeper | Previews | Phone |
+| --- | --- | --- | --- |
+| Typical device | A computer chosen as a backup | Most family computers and tablets | iPhone, later Android |
+| Stores | Full archive: originals, sidecars, catalog files | Preview and thumbnail cache | Preview cache, plus its own captures until two keepers hold them |
+| Counts toward the two-copy rule | Yes | No | No |
+| Gemini key | Asked for when an editor turns Keeper on; AI jobs run here | Not needed | Not needed |
+| Default | On for an editor's or admin's first computer | Viewers' computers | Always (can't be a keeper) |
+
+Any device can fetch an original on demand or pin works to keep their originals. A viewer may choose to be a keeper as a family backup.
+
+### Preview cache
+
+| File | Format | Typical size |
+| --- | --- | --- |
+| Preview | JPEG, long edge 2048 px (never enlarged), quality 85, original colour profile kept, small embedded XMP | 0.3–0.7 MB |
+| Thumbnail | JPEG, long edge 400 px, quality 80 | ≈ 16 KB |
+| Restored | Preview and thumbnail of the restored version, marked as AI-altered | same |
+
+For 10,000 images, a previews device needs about 4–6 GB; a keeper with 150 MB originals needs about 1.5 TB. AI classification and OCR work from previews; restoration fetches the original.
 
 ## Invites
 
@@ -71,7 +95,7 @@ The secret lives in the URL fragment, which browsers never send to a server. Lin
 
 ## AI
 
-- **Classification, titling, restoration:** Gemini, called directly with the person's own key.
+- **Classification, titling, restoration:** Gemini, called directly with the person's own key, from keeper devices only.
 - **Grouping:** sequence rules, perceptual hashes, and image embeddings (DINOv2 or SigLIP 2 via ONNX Runtime) narrow candidates before any Gemini call.
 - **OCR:** Apple Vision on Apple platforms; Windows.Media.Ocr or Tesseract on Windows.
 - **Face recognition:** out of scope. No available model has both an open licence and clear training-data provenance.
@@ -90,7 +114,7 @@ Before calling Gemini, a device writes a `claim job` entry with a lease so other
 ## Build order
 
 1. Prototypes: bundled Syncthing with invite links; 50,000-thumbnail grid in Tauri on Mac and Windows; XMP sidecars read back by Lightroom, digiKam, and exiftool
-2. Mac app on a single device
+2. Mac app on a single device, including the bulk editor and preview cache
 3. Sync between Macs
 4. Invites, roles, and sharing
 5. iPhone
