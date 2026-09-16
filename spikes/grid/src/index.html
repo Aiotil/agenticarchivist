@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grid benchmark · AgenticArchivist</title>
+<style>
+  :root { color-scheme: light dark; --bg:#f1f3ef; --tile:#dde2dc; --ink:#1b211e; --muted:#58625d; --bar:#fbfbf8; --rule:#d4d9d2; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111513; --tile:#232926; --ink:#e3e8e3; --muted:#9ba59f; --bar:#191e1c; --rule:#2b3330; } }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  #bar { position: fixed; inset: 0 0 auto 0; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--bar); border-bottom: 1px solid var(--rule); z-index: 2; }
+  #bar button { font: inherit; padding: 4px 10px; }
+  #status { color: var(--muted); font-variant-numeric: tabular-nums; }
+  #scroller { position: fixed; inset: 44px 0 0 0; overflow-y: auto; }
+  #canvas { position: relative; }
+  .tile { position: absolute; left: 0; top: 0; width: 200px; height: 236px; contain: strict; will-change: transform; }
+  .tile .frame { width: 200px; height: 200px; background: var(--tile); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .tile img { max-width: 100%; max-height: 100%; display: block; }
+  .tile .cap { height: 36px; padding-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+  #results { position: fixed; right: 16px; bottom: 16px; max-width: 520px; max-height: 60vh; overflow: auto; background: var(--bar); border: 1px solid var(--rule); padding: 12px; white-space: pre-wrap; font: 12px/1.45 ui-monospace, Menlo, Consolas, monospace; z-index: 3; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <strong>Grid benchmark</strong>
+  <button id="run" type="button">Run benchmark</button>
+  <span id="status">Loading…</span>
+</div>
+<div id="scroller"><div id="canvas"></div></div>
+<pre id="results" hidden></pre>
+<script>
+"use strict";
+const CELL_W = 216, ROW_H = 252, OVERSCAN_ROWS = 3, PAGE = 1000;
+const scroller = document.getElementById("scroller");
+const canvas = document.getElementById("canvas");
+const statusEl = document.getElementById("status");
+let count = 0, columns = 1, rows = 0;
+const pages = new Map();          // page index -> items
+const pending = new Set();
+const pool = [];                  // reusable tile elements
+const assigned = new Map();       // item index -> tile
+
+function layout() {
+  columns = Math.max(1, Math.floor((scroller.clientWidth - 16) / CELL_W));
+  rows = Math.ceil(count / columns);
+  canvas.style.height = rows * ROW_H + 16 + "px";
+  for (const tile of assigned.values()) release(tile);
+  assigned.clear();
+  render();
+}
+
+function item(i) {
+  const page = Math.floor(i / PAGE);
+  const items = pages.get(page);
+  if (items) return items[i - page * PAGE];
+  if (!pending.has(page)) {
+    pending.add(page);
+    fetch(`/api/works?offset=${page * PAGE}&limit=${PAGE}`)
+      .then(r => r.json())
+      .then(d => { pages.set(page, d.items); pending.delete(page); render(); });
+  }
+  return null;
+}
+
+function acquire() {
+  const tile = pool.pop();
+  if (tile) return tile;
+  const el = document.createElement("div");
+  el.className = "tile";
+  el.innerHTML = '<div class="frame"><img alt="" decoding="async"></div><div class="cap"></div>';
+  canvas.appendChild(el);
+  return el;
+}
+
+function release(tile) {
+  tile.style.transform = "translate(-9999px,0)";
+  tile.dataset.index = "";
+  pool.push(tile);
+}
+
+function visibleRange() {
+  const top = scroller.scrollTop;
+  const firstRow = Math.max(0, Math.floor(top / ROW_H) - OVERSCAN_ROWS);
+  const lastRow = Math.min(rows - 1, Math.ceil((top + scroller.clientHeight) / ROW_H) + OVERSCAN_ROWS);
+  return [firstRow * columns, Math.min(count - 1, (lastRow + 1) * columns - 1)];
+}
+
+function render() {
+  if (!count) return;
+  const [from, to] = visibleRange();
+  for (const [i, tile] of assigned) {
+    if (i < from || i > to) { release(tile); assigned.delete(i); }
+  }
+  for (let i = from; i <= to; i++) {
+    let tile = assigned.get(i);
+    if (!tile) { tile = acquire(); assigned.set(i, tile); }
+    const col = i % columns, row = Math.floor(i / columns);
+    tile.style.transform = `translate(${8 + col * CELL_W}px, ${8 + row * ROW_H}px)`;
+    if (tile.dataset.index !== String(i)) {
+      tile.dataset.index = String(i);
+      const img = tile.firstChild.firstChild;
+      img.src = `/thumb/${i}.jpg`;
+      tile.lastChild.textContent = "";
+    }
+    const meta = item(i);
+    if (meta && !tile.lastChild.textContent) tile.lastChild.textContent = `${meta.title} · ${meta.date}`;
+  }
+}
+
+let ticking = false;
+scroller.addEventListener("scroll", () => {
+  if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; render(); }); }
+}, { passive: true });
+window.addEventListener("resize", layout);
+
+// ---------------------------------------------------------------------------
+// Benchmark
+// ---------------------------------------------------------------------------
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function stats(deltas) {
+  const s = [...deltas].sort((a, b) => a - b);
+  const pct = p => s.length ? s[Math.min(s.length - 1, Math.floor(p * s.length))] : 0;
+  const median = pct(0.5);
+  return {
+    frames: s.length,
+    median_ms: +median.toFixed(2),
+    fps: +(1000 / median).toFixed(1),
+    p95_ms: +pct(0.95).toFixed(2),
+    p99_ms: +pct(0.99).toFixed(2),
+    max_ms: +(s[s.length - 1] || 0).toFixed(2),
+    janky_pct: +(100 * s.filter(d => d > median * 1.8).length / Math.max(1, s.length)).toFixed(2),
+    over_50ms: s.filter(d => d > 50).length,
+  };
+}
+
+function blankShare() {
+  let visible = 0, blank = 0;
+  const top = scroller.scrollTop, bottom = top + scroller.clientHeight;
+  for (const [i, tile] of assigned) {
+    const y = 8 + Math.floor(i / columns) * ROW_H;
+    if (y + 200 < top || y > bottom) continue;
+    visible++;
+    const img = tile.firstChild.firstChild;
+    if (!(img.complete && img.naturalWidth > 0)) blank++;
+  }
+  return visible ? blank / visible : 0;
+}
+
+async function scrollPhase(pxPerSecond, seconds, measureBlank) {
+  const deltas = [];
+  const blanks = [];
+  let last = performance.now();
+  const start = last;
+  const startTop = scroller.scrollTop;
+  const maxTop = scroller.scrollHeight - scroller.clientHeight;
+  await new Promise(resolve => {
+    function frame(now) {
+      deltas.push(now - last);
+      last = now;
+      const elapsed = (now - start) / 1000;
+      scroller.scrollTop = Math.min(maxTop, startTop + elapsed * pxPerSecond);
+      if (measureBlank && elapsed > 0.5) blanks.push(blankShare());
+      if (elapsed < seconds && scroller.scrollTop < maxTop) requestAnimationFrame(frame);
+      else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+  const out = stats(deltas.slice(1));
+  if (measureBlank) out.avg_blank_visible_pct = +(100 * blanks.reduce((a, b) => a + b, 0) / Math.max(1, blanks.length)).toFixed(1);
+  return out;
+}
+
+async function timeToFilled() {
+  const times = [];
+  for (let k = 0; k < 10; k++) {
+    const target = Math.floor(((k * 7919) % 1000) / 1000 * (rows - 10)) * ROW_H;
+    scroller.scrollTop = target;
+    const t0 = performance.now();
+    await new Promise(r => requestAnimationFrame(r));
+    while (blankShare() > 0 && performance.now() - t0 < 10000) {
+      await new Promise(r => requestAnimationFrame(r));
+    }
+    times.push(performance.now() - t0);
+    await sleep(200);
+  }
+  const s = times.sort((a, b) => a - b);
+  return { jumps: s.length, median_ms: +s[5].toFixed(0), max_ms: +s[s.length - 1].toFixed(0) };
+}
+
+async function benchmark() {
+  const out = document.getElementById("results");
+  out.hidden = false;
+  out.textContent = "Running… keep this window in front.";
+  scroller.scrollTop = 0;
+  await sleep(1500);
+  const result = {
+    userAgent: navigator.userAgent,
+    viewport: `${scroller.clientWidth}x${scroller.clientHeight}`,
+    devicePixelRatio: window.devicePixelRatio,
+    screen: `${screen.width}x${screen.height}`,
+    engine: new URLSearchParams(location.search).get("engine") || "unknown",
+    count, columns,
+    dom_tiles: canvas.children.length,
+  };
+  statusEl.textContent = "Phase 1/3: browsing scroll (1,500 px/s)";
+  result.browse = await scrollPhase(1500, 20, true);
+  statusEl.textContent = "Phase 2/3: fling through the whole library";
+  scroller.scrollTop = 0;
+  await sleep(500);
+  result.fling = await scrollPhase((scroller.scrollHeight - scroller.clientHeight) / 30, 30, false);
+  statusEl.textContent = "Phase 3/3: jump to random positions";
+  result.jump_to_filled = await timeToFilled();
+  result.dom_tiles_after = canvas.children.length;
+  if (performance.memory) result.js_heap_mb = +(performance.memory.usedJSHeapSize / 1e6).toFixed(1);
+  statusEl.textContent = "Done";
+  out.textContent = JSON.stringify(result, null, 2);
+  await fetch("/api/results", { method: "POST", body: JSON.stringify(result) });
+}
+
+document.getElementById("run").addEventListener("click", benchmark);
+
+fetch("/api/meta").then(r => r.json()).then(d => {
+  count = d.count;
+  statusEl.textContent = `${count.toLocaleString()} works`;
+  layout();
+  if (new URLSearchParams(location.search).has("autorun")) benchmark();
+});
+</script>
+</body>
+</html>

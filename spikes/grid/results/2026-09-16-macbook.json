@@ -1,0 +1,111 @@
+[
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6.2 Safari/605.1.15",
+    "viewport": "1479x711",
+    "devicePixelRatio": 2,
+    "count": 50000,
+    "columns": 6,
+    "dom_tiles": 42,
+    "browse": {
+      "frames": 301,
+      "median_ms": 67,
+      "fps": 14.9,
+      "p95_ms": 69,
+      "p99_ms": 74,
+      "max_ms": 94,
+      "janky_pct": 0,
+      "over_50ms": 299,
+      "avg_blank_visible_pct": 0
+    },
+    "fling": {
+      "frames": 489,
+      "median_ms": 67,
+      "fps": 14.9,
+      "p95_ms": 67,
+      "p99_ms": 68,
+      "max_ms": 104,
+      "janky_pct": 0,
+      "over_50ms": 412
+    },
+    "jump_to_filled": {
+      "jumps": 10,
+      "median_ms": 0,
+      "max_ms": 64
+    },
+    "dom_tiles_after": 66,
+    "conditions": "Safari, external 4K display at 30 Hz, Low Power Mode on"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6.2 Safari/605.1.15",
+    "viewport": "1479x711",
+    "devicePixelRatio": 2,
+    "count": 50000,
+    "columns": 6,
+    "dom_tiles": 66,
+    "browse": {
+      "frames": 571,
+      "median_ms": 33,
+      "fps": 30.3,
+      "p95_ms": 63,
+      "p99_ms": 67,
+      "max_ms": 72,
+      "janky_pct": 5.25,
+      "over_50ms": 30,
+      "avg_blank_visible_pct": 0
+    },
+    "fling": {
+      "frames": 901,
+      "median_ms": 33,
+      "fps": 30.3,
+      "p95_ms": 34,
+      "p99_ms": 34,
+      "max_ms": 37,
+      "janky_pct": 0,
+      "over_50ms": 0
+    },
+    "jump_to_filled": {
+      "jumps": 10,
+      "median_ms": 0,
+      "max_ms": 32
+    },
+    "dom_tiles_after": 66,
+    "conditions": "Safari, built-in display, Low Power Mode on"
+  },
+  {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "viewport": "1481x807",
+    "devicePixelRatio": 2,
+    "count": 50000,
+    "columns": 6,
+    "dom_tiles": 48,
+    "browse": {
+      "frames": 2401,
+      "median_ms": 8.3,
+      "fps": 120.5,
+      "p95_ms": 9.2,
+      "p99_ms": 9.4,
+      "max_ms": 10.3,
+      "janky_pct": 0,
+      "over_50ms": 0,
+      "avg_blank_visible_pct": 0
+    },
+    "fling": {
+      "frames": 3599,
+      "median_ms": 8.3,
+      "fps": 120.5,
+      "p95_ms": 9.3,
+      "p99_ms": 9.4,
+      "max_ms": 18.89,
+      "janky_pct": 0.06,
+      "over_50ms": 0
+    },
+    "jump_to_filled": {
+      "jumps": 10,
+      "median_ms": 1,
+      "max_ms": 16
+    },
+    "dom_tiles_after": 72,
+    "js_heap_mb": 5.2,
+    "conditions": "Chrome, built-in 120 Hz display"
+  }
+]
