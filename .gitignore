@@ -1,0 +1,24 @@
+# Rust
+/target/
+
+# Node / Tauri (desktop)
+node_modules/
+/desktop/build/
+/desktop/.svelte-kit/
+/desktop/src-tauri/target/
+
+# Xcode (ios)
+xcuserdata/
+DerivedData/
+*.xcuserstate
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# OS and editors
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/

@@ -1,0 +1,15 @@
+[package]
+name = "agenticarchivist-daemon"
+description = "Background process for AgenticArchivist: ingest, AI jobs, and sync supervision"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "agenticarchivist-daemon"
+path = "src/main.rs"
+
+[dependencies]
+agenticarchivist-core = { path = "../core" }

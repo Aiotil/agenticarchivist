@@ -1,0 +1,11 @@
+[package]
+name = "agenticarchivist-core"
+description = "Collection library, op-log, sidecars, and sync control for AgenticArchivist"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lib]
+name = "agenticarchivist_core"
