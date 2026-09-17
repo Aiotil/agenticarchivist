@@ -1,8 +1,13 @@
 //! AgenticArchivist core library.
 //!
-//! Will hold the per-device signed op-log, the SQLite library built from it,
-//! XMP sidecar and catalog writers, the Gemini client, and Syncthing control.
-//! See `docs/architecture.md`.
+//! Holds the collection library and import. Will also hold the per-device
+//! signed op-log, XMP sidecar and catalog writers, the Gemini client, and
+//! Syncthing control. See `docs/architecture.md`.
+
+pub mod import;
+pub mod library;
+pub mod media;
+pub mod time;
 
 /// Name of the per-collection folder that holds logs, derived images, and catalog files.
 pub const COLLECTION_META_DIR: &str = "_agenticarchivist";
