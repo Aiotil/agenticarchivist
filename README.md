@@ -37,6 +37,20 @@ cargo build
 cargo test
 ```
 
+## Trying the import
+
+The first working piece reads a folder of captures into a collection's library. It never changes the source folder.
+
+```sh
+cargo run --release -p agenticarchivist-daemon -- import ~/Pictures/Captures ~/AgenticArchivist/Test
+cargo run --release -p agenticarchivist-daemon -- status ~/AgenticArchivist/Test
+cargo run --release -p agenticarchivist-daemon -- contact-sheet ~/AgenticArchivist/Test
+```
+
+For each supported file (on a Mac: JPEG, HEIC, TIFF, PNG, camera RAW, PDF and more), import records a SHA-256 fingerprint, where the file is, and its source metadata (capture time, camera, lens, GPS, EXIF orientation, sequence number from the file name). It writes 400 px thumbnails turned by EXIF orientation and renders every PDF page at 300 DPI. Running import again skips files that haven't changed, and files with identical content are recorded once.
+
+Everything goes in `<collection>/_agenticarchivist/`: the library at `cache/library.sqlite` and derived files at `derived/<first two characters of the fingerprint>/<fingerprint>/`. For now the originals stay where they are; whether import also copies them into the collection folder is still open.
+
 ## Documentation
 
 - [Architecture](docs/architecture.md)

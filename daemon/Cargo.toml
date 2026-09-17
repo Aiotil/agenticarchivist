@@ -13,3 +13,4 @@ path = "src/main.rs"
 
 [dependencies]
 agenticarchivist-core = { path = "../core" }
+anyhow = "1"

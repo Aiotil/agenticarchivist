@@ -9,3 +9,17 @@ publish.workspace = true
 
 [lib]
 name = "agenticarchivist_core"
+
+[dependencies]
+anyhow = "1"
+rusqlite = { version = "0.40", features = ["bundled"] }
+sha2 = "0.11"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "tiff", "webp", "gif", "bmp"] }
+
+[target.'cfg(target_vendor = "apple")'.dependencies]
+objc2-core-foundation = "0.3"
+objc2-core-graphics = "0.3"
+objc2-image-io = "0.3"
+
+[dev-dependencies]
+tempfile = "3"

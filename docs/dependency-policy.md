@@ -25,6 +25,9 @@ Exceptions are recorded below with the reason and the fallback.
 | notify | CC0-1.0 | Folder watching |
 | ed25519-dalek, sha2 | BSD-3-Clause, MIT OR Apache-2.0 | Log signatures, checksums |
 | quick-xml | MIT | XMP and VRA Core XML |
+| objc2-core-foundation, objc2-core-graphics, objc2-image-io | Zlib OR Apache-2.0 OR MIT | ImageIO and Core Graphics on Apple platforms: image metadata, thumbnails, PDF pages |
+| anyhow | MIT OR Apache-2.0 | Error handling |
+| tempfile (tests only) | MIT OR Apache-2.0 | Temporary folders in tests |
 | image, tiff | MIT OR Apache-2.0, MIT | Image decoding, 16-bit TIFF |
 | Little CMS | MIT | Colour management (Windows) |
 | LibRaw | CDDL-1.0 (elected) | RAW decoding (Windows) |
